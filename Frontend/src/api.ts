@@ -1,7 +1,9 @@
 export interface User {
   id?: number;
-  name: string;
+  username: string;
   email: string;
+  password?: string;
+  role?: string;
 }
 
 function getAuthHeaders(): HeadersInit {
@@ -13,7 +15,7 @@ function getAuthHeaders(): HeadersInit {
 }
 
 export async function fetchUsers(): Promise<User[]> {
-  const response = await fetch('/api/users', {
+  const response = await fetch('http://localhost:8080/api/users', {
     headers: {
       ...getAuthHeaders(),
     },
@@ -25,7 +27,7 @@ export async function fetchUsers(): Promise<User[]> {
 }
 
 export async function createUser(user: Omit<User, 'id'>): Promise<User> {
-  const response = await fetch('/api/users', {
+  const response = await fetch('http://localhost:8080/api/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(user),

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { createUser, fetchUsers, User } from './api';
+import { createUser, fetchUsers } from './api';
+import type { User } from './api';
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,44 +22,96 @@ export default function Users() {
     e.preventDefault();
     setError(null);
     try {
-      const created = await createUser({ name, email });
+      const created = await createUser({ username, email, password, role: 'USER' });
       setUsers((prev) => [...prev, created]);
-      setName('');
+      setUsername('');
       setEmail('');
+      setPassword('');
     } catch (e: any) {
       setError(e.message ?? 'Failed to create user');
     }
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 640, margin: '0 auto' }}>
-      <h1>Users</h1>
-      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12, marginBottom: 24 }}>
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <button type="submit">Create</button>
-      </form>
+    <>
+      {/* Create User Form */}
+      <div className="user-form">
+        <h2 className="form-title">Create New User</h2>
+        <form onSubmit={onSubmit}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="username">Username</label>
+            <input
+              id="username"
+              className="form-input"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label" htmlFor="email">Email</label>
+            <input
+              id="email"
+              className="form-input"
+              placeholder="Enter email address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">Password</label>
+            <input
+              id="password"
+              className="form-input"
+              placeholder="Enter password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button type="submit" className="btn">
+            Create User
+          </button>
+        </form>
+      </div>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {/* Error Display */}
+      {error && <div className="error">{error}</div>}
 
-      <ul>
-        {users.map((u) => (
-          <li key={u.id ?? `${u.name}-${u.email}`}>{u.name} ({u.email})</li>
-        ))}
-      </ul>
-    </div>
+      {/* User List */}
+      <div className="user-list-container">
+        <h2 className="user-list-title">Registered Users</h2>
+        
+        {loading && <div className="loading">Loading users...</div>}
+        
+        {!loading && users.length === 0 && (
+          <div className="empty-state">
+            No users found. Create your first user above!
+          </div>
+        )}
+        
+        {!loading && users.length > 0 && (
+          <ul className="user-list">
+            {users.map((u) => (
+              <li key={u.id ?? `${u.username}-${u.email}`} className="user-item">
+                <div className="user-info">
+                  <div className="user-username">{u.username}</div>
+                  <div className="user-email">{u.email}</div>
+                  <div className="user-role">{u.role}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 }
 
